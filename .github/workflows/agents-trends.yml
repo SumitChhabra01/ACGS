@@ -1,34 +1,56 @@
+# Classify + score trends every 2 hours → Supabase trends table.
+# Uses Anthropic if ANTHROPIC_API_KEY is set; otherwise classifies with mock (still runs).
+
 name: Agents — Trends (every 2h)
 
 on:
   schedule:
-    - cron: "0 */2 * * *" # every 2 hours
+    - cron: "15 */2 * * *" # every 2h at :15 UTC (staggered from content)
   workflow_dispatch:
 
 concurrency:
   group: agents-trends
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   trends:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: services
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+          cache: pip
           cache-dependency-path: services/requirements.txt
+
+      - name: Verify secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.SUPABASE_URL }}" ] && missing="$missing SUPABASE_URL"
+          [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Add these GitHub repository secrets:$missing"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "::warning::ANTHROPIC_API_KEY not set — trends will use offline stubs (not ideal for production)."
+          fi
+
       - run: pip install -r requirements.txt
+
       - name: Run trend agent
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
-          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRAND_NICHE: ${{ secrets.BRAND_NICHE }}
+          LLM_PROVIDER: ""
         run: python run.py trends

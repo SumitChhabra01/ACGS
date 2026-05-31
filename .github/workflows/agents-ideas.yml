@@ -1,24 +1,24 @@
-# Trends → content drafts every 6 hours → Supabase content_items (pending_approval).
-# Requires ANTHROPIC_API_KEY for real drafts; mock output is NOT saved to the pipeline.
+# Weekly Reels ideas from your top-performing Instagram hooks.
+# Requires META + ANTHROPIC for best results.
 
-name: Agents — Content (every 6h)
+name: Agents — Reels ideas (weekly)
 
 on:
   schedule:
-    - cron: "30 */6 * * *" # every 6h at :30 UTC
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
   workflow_dispatch:
 
 concurrency:
-  group: agents-content
+  group: agents-ideas
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  content:
+  ideas:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: services
@@ -36,21 +36,24 @@ jobs:
           missing=""
           [ -z "${{ secrets.SUPABASE_URL }}" ] && missing="$missing SUPABASE_URL"
           [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY"
+          [ -z "${{ secrets.META_ACCESS_TOKEN }}" ] && missing="$missing META_ACCESS_TOKEN"
           if [ -n "$missing" ]; then
             echo "::error::Add these GitHub repository secrets:$missing"
             exit 1
           fi
           if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
-            echo "::warning::ANTHROPIC_API_KEY not set — no real drafts will be saved (mock-only run)."
+            echo "::warning::ANTHROPIC_API_KEY not set — Reels drafts will not be saved to the pipeline."
           fi
 
       - run: pip install -r requirements.txt
 
-      - name: Generate content drafts
+      - name: Draft Reels from top hooks
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           BRAND_NICHE: ${{ secrets.BRAND_NICHE }}
           LLM_PROVIDER: ""
-        run: python run.py content
+        run: python run.py ideas

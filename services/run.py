@@ -15,13 +15,16 @@ present, so CI never burns tokens. Outputs a JSON summary to stdout.
 from __future__ import annotations
 
 import json
+import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 # Load .env BEFORE importing agents/config so env-driven settings (e.g.
 # LLM_PROVIDER, model tiers) are read with the correct values at import time.
-load_dotenv()
+# Repo root .env for local runs; GitHub Actions inject secrets via env (no file).
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from agents.orchestrator import Orchestrator  # noqa: E402
 from integrations import instagram as ig  # noqa: E402
@@ -59,8 +62,11 @@ def _ig_sync() -> dict:
 
 def main(argv: list[str]) -> int:
     command = argv[1] if len(argv) > 1 else "trends"
-    brand = "default"
-    niche = "AI tools & autonomous workflows for builders"
+    brand = os.getenv("SUPABASE_BRAND_ID", "default")
+    niche = os.getenv(
+        "BRAND_NICHE",
+        "cinematic travel storytelling for @cineai_diaries — India, faith, film, reels",
+    )
 
     if command == "ig-longtoken":
         if len(argv) < 3:

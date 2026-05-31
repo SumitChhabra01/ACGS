@@ -54,7 +54,18 @@ class Orchestrator:
         }
 
     def run_analytics(self) -> AgentResult:
-        return AnalyticsAgent(self.router, self.brand_id).execute()
+        res = AnalyticsAgent(self.router, self.brand_id).execute()
+        store.save_audit_log(
+            agent="analytics",
+            action="analytics_run",
+            detail={
+                "source": res.output.get("source"),
+                "posts_analyzed": res.output.get("posts_analyzed"),
+                "followers": res.output.get("followers"),
+                "recommendations": res.output.get("recommendations", [])[:5],
+            },
+        )
+        return res
 
     def run_reel_ideas(
         self,

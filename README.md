@@ -70,5 +70,9 @@ This is a **static preview** with sample data so others can see the UI. It does 
 
 Enable Pages once: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
+## Hands-free agents (GitHub Actions cron)
+
+Scheduled workflows run trends, content, analytics, and weekly Reels ideas in the cloud and write to Supabase. See **[docs/GITHUB_CRON.md](./docs/GITHUB_CRON.md)** for required secrets and schedules.
+
 ## Status
 Phase 1 (Foundation) — in progress. See `docs/DESIGN.md` §14 for the phase plan.

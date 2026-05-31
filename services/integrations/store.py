@@ -87,9 +87,20 @@ def record_usage(
         pass
 
 
+def _is_real_draft(d: dict[str, Any]) -> bool:
+    body = str(d.get("body", ""))
+    if not body.strip():
+        return False
+    # Skip offline/CI stubs so cron without API keys does not fill the pipeline.
+    if body.startswith("[MOCK:") or "[anthropic-error:" in body or "[PAUSED:" in body:
+        return False
+    return True
+
+
 def save_content_items(drafts: list[dict[str, Any]]) -> int:
     """Persist content-agent drafts into content_items. Returns rows written."""
     client = _get_client()
+    drafts = [d for d in drafts if _is_real_draft(d)]
     if client is None or not drafts:
         return 0
     brand_id = _resolve_brand_id(client)
@@ -138,3 +149,16 @@ def save_trends(trends: list[dict[str, Any]]) -> int:
         return len(rows)
     except Exception:  # noqa: BLE001
         return 0
+
+
+def save_audit_log(*, agent: str, action: str, detail: dict[str, Any]) -> None:
+    """Append a row to audit_logs (cron summaries, growth snapshots)."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        client.table("audit_logs").insert(
+            {"actor": agent, "action": action, "entity": "workflow", "detail": detail}
+        ).execute()
+    except Exception:  # noqa: BLE001
+        pass

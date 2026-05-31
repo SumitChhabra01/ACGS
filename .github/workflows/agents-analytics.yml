@@ -1,34 +1,56 @@
-name: Agents — Analytics + Learning (daily)
+# Daily Instagram analytics → growth recommendations → Supabase audit_logs.
+# Manual run: Actions → "Agents — Analytics" → Run workflow
+
+name: Agents — Analytics (daily)
 
 on:
   schedule:
-    - cron: "0 3 * * *" # daily at 03:00 UTC
+    - cron: "0 3 * * *" # 03:00 UTC daily (~8:30 AM IST)
   workflow_dispatch:
 
 concurrency:
   group: agents-analytics
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   analytics:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: services
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+          cache: pip
           cache-dependency-path: services/requirements.txt
+
+      - name: Verify secrets
+        run: |
+          missing=""
+          [ -z "${{ secrets.SUPABASE_URL }}" ] && missing="$missing SUPABASE_URL"
+          [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY"
+          [ -z "${{ secrets.META_ACCESS_TOKEN }}" ] && missing="$missing META_ACCESS_TOKEN"
+          if [ -n "$missing" ]; then
+            echo "::error::Add these GitHub repository secrets:$missing"
+            exit 1
+          fi
+
       - run: pip install -r requirements.txt
-      - name: Daily analytics + growth recommendations
+
+      - name: Run analytics agent
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          BRAND_NICHE: ${{ secrets.BRAND_NICHE }}
+          # Cloud runners: never use Ollama (local-only).
+          LLM_PROVIDER: ""
         run: python run.py analytics
