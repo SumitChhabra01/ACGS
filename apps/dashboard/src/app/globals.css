@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "Fira Code", monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg text-ink antialiased;
+  background-image:
+    radial-gradient(900px 500px at 12% -8%, rgba(52, 231, 255, 0.12), transparent 60%),
+    radial-gradient(800px 520px at 92% 8%, rgba(168, 85, 247, 0.14), transparent 60%),
+    radial-gradient(700px 600px at 60% 110%, rgba(255, 78, 205, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .glass {
+    @apply rounded-2xl border border-white/10 bg-bg-panel shadow-panel backdrop-blur-xl;
+  }
+
+  .glass-hover {
+    @apply transition-colors hover:border-white/20 hover:bg-white/5;
+  }
+
+  .neon-text {
+    text-shadow: 0 0 12px currentColor;
+  }
+
+  .grid-overlay {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+}
+
+/* Thin neon scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 231, 255, 0.4) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(52, 231, 255, 0.35);
+  border-radius: 9999px;
+}

@@ -1,0 +1,16 @@
+[project]
+name = "aicos-agents"
+version = "0.1.0"
+description = "AICOS Python agent layer — event-driven, cost-disciplined content agents"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
