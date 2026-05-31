@@ -60,5 +60,15 @@ pip install -r requirements.txt
 ## Cost discipline (non-negotiable)
 Every AI call routes through the model router + budget guard. Cheapest capable tier first (local → Haiku → Sonnet/Opus), cache before regenerate, retrieve before generate, validate before publish. Target: ~$100–500/month at MVP.
 
+## Public demo (GitHub Pages)
+
+After the **Deploy GitHub Pages** workflow runs on `main`, the dashboard UI is available at:
+
+**https://sumitchhabra01.github.io/ACGS/**
+
+This is a **static preview** with sample data so others can see the UI. It does not run Python agents or live APIs. For full live mode, run locally (`npm run dev`) or deploy to Vercel with your `.env` secrets.
+
+Enable Pages once: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
 ## Status
 Phase 1 (Foundation) — in progress. See `docs/DESIGN.md` §14 for the phase plan.

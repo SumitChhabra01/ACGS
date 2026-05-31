@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Mic, MicOff, SendHorizonal, TerminalSquare } from "lucide-react";
+import { isPublicDemo } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type LogEntry = { id: string; source: "text" | "voice"; text: string; reply: string };
@@ -25,6 +26,20 @@ export function CommandConsole() {
     if (!cmd || busy) return;
     setBusy(true);
     setValue("");
+    if (isPublicDemo) {
+      setLog((l) => [
+        {
+          id: crypto.randomUUID(),
+          source,
+          text: cmd,
+          reply:
+            "Public demo only — commands run in the full app (local or Vercel). Clone the repo to try agents.",
+        },
+        ...l,
+      ]);
+      setBusy(false);
+      return;
+    }
     try {
       const res = await fetch("/api/commands", {
         method: "POST",

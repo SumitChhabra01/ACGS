@@ -1,6 +1,7 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { PipelineBoard } from "@/components/widgets/PipelineBoard";
 import { getContent, getDataMode } from "@/lib/queries";
+import { isPublicDemo } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +12,14 @@ export default async function ContentPage() {
       <TopBar
         title="Content Pipeline"
         subtitle={
-          mode.live
-            ? "Idea → Draft → Approval → Scheduled → Published (live)"
-            : "Idea → Draft → Approval → Scheduled → Published (demo data)"
+          isPublicDemo
+            ? "Public preview — read-only sample pipeline"
+            : mode.live
+              ? "Idea → Draft → Approval → Scheduled → Published (live)"
+              : "Idea → Draft → Approval → Scheduled → Published (demo data)"
         }
       />
-      <PipelineBoard items={items} live={mode.live} />
+      <PipelineBoard items={items} live={!isPublicDemo && mode.live} />
     </div>
   );
 }

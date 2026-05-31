@@ -1,0 +1,65 @@
+# Build a static demo of the dashboard and publish to GitHub Pages.
+# Live URL: https://sumitchhabra01.github.io/ACGS/
+#
+# Note: GitHub Pages is static-only — no Python agents, Supabase writes, or API routes.
+# Full live mode: run locally or deploy the Next app to Vercel with env vars.
+
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      # Static export cannot include middleware or API route handlers.
+      - name: Prepare static export
+        working-directory: apps/dashboard
+        run: |
+          if [ -f src/middleware.ts ]; then mv src/middleware.ts ../../.pages-stash-middleware.ts; fi
+          if [ -d src/app/api ]; then mv src/app/api ../../.pages-stash-api; fi
+          for f in src/app/page.tsx src/app/content/page.tsx src/app/analytics/page.tsx; do
+            sed -i 's/export const dynamic = "force-dynamic"/export const dynamic = "force-static"/' "$f"
+          done
+
+      - name: Build static site
+        env:
+          GITHUB_PAGES: "true"
+          NEXT_PUBLIC_GITHUB_PAGES: "true"
+        run: npm run build --workspace apps/dashboard
+
+      - name: Add .nojekyll
+        run: touch apps/dashboard/out/.nojekyll
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/dashboard/out
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

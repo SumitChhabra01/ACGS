@@ -6,6 +6,7 @@ import { demoAnalytics } from "@/lib/demo-data";
 import { formatCompact } from "@/lib/utils";
 import { getAccount, getMedia, isInstagramConfigured } from "@/lib/instagram";
 import { analyze, toPostStat, type GrowthReport } from "@/lib/growth";
+import { isPublicDemo } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,14 @@ export default async function AnalyticsPage() {
     const ytTotal = demoAnalytics.reduce((s, d) => s + d.youtube, 0);
     return (
       <div>
-        <TopBar title="Analytics" subtitle="Demo data — connect Instagram to see live @cineai_diaries metrics" />
+        <TopBar
+          title="Analytics"
+          subtitle={
+            isPublicDemo
+              ? "Public preview — sample metrics"
+              : "Demo data — connect Instagram to see live @cineai_diaries metrics"
+          }
+        />
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatPill label="IG reach (7d)" value={formatCompact(igTotal)} accent="pink" />
           <StatPill label="YT views (7d)" value={formatCompact(ytTotal)} accent="red" />

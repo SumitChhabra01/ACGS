@@ -12,6 +12,7 @@ import {
   getTrends,
   getUsageSummary,
 } from "@/lib/queries";
+import { isPublicDemo } from "@/lib/site";
 import { formatCompact, formatUsd } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -32,9 +33,11 @@ export default async function CommandCenter() {
       <TopBar
         title="Command Center"
         subtitle={
-          mode.live
-            ? "Mission control — live data"
-            : "Mission control — demo data (connect Supabase for live)"
+          isPublicDemo
+            ? "Public preview — sample data (full app runs locally or on Vercel)"
+            : mode.live
+              ? "Mission control — live data"
+              : "Mission control — demo data (connect Supabase for live)"
         }
       />
 
