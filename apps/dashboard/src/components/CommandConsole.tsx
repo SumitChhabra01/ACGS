@@ -33,7 +33,7 @@ export function CommandConsole() {
           source,
           text: cmd,
           reply:
-            "Public demo only — commands run in the full app (local or Vercel). Clone the repo to try agents.",
+            "View-only on GitHub Pages. Run agents locally or via GitHub Actions cron; refresh the page to see new data.",
         },
         ...l,
       ]);
@@ -94,17 +94,18 @@ export function CommandConsole() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative min-w-0 flex-1">
           <TerminalSquare className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neon-cyan" />
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit(value, "text")}
-            placeholder="Type a command, e.g. 'Generate 5 LinkedIn posts on AI agents'"
-            className="w-full rounded-xl border border-white/10 bg-bg-soft/70 py-3 pl-10 pr-3 font-mono text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-neon-cyan/60"
+            placeholder="Command…"
+            className="w-full rounded-xl border border-white/10 bg-bg-soft/70 py-3 pl-10 pr-3 font-mono text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-neon-cyan/60 sm:placeholder:text-ink-faint"
           />
         </div>
+        <div className="flex shrink-0 gap-2 sm:contents">
         <button
           onClick={toggleVoice}
           aria-label="Toggle voice command"
@@ -125,6 +126,7 @@ export function CommandConsole() {
         >
           <SendHorizonal className="h-5 w-5" />
         </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">

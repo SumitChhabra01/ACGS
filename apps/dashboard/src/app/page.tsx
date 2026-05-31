@@ -1,3 +1,4 @@
+import { CommandCenterLive } from "@/components/live/CommandCenterLive";
 import { TopBar } from "@/components/layout/TopBar";
 import { Panel, StatPill } from "@/components/ui/Panel";
 import { AgentGrid } from "@/components/widgets/AgentGrid";
@@ -18,6 +19,10 @@ import { formatCompact, formatUsd } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function CommandCenter() {
+  if (isPublicDemo) {
+    return <CommandCenterLive />;
+  }
+
   const [agents, trends, usage, burn, mode] = await Promise.all([
     getAgents(),
     getTrends(),
@@ -33,15 +38,13 @@ export default async function CommandCenter() {
       <TopBar
         title="Command Center"
         subtitle={
-          isPublicDemo
-            ? "Public preview — sample data (full app runs locally or on Vercel)"
-            : mode.live
-              ? "Mission control — live data"
-              : "Mission control — demo data (connect Supabase for live)"
+          mode.live
+            ? "Mission control — live data"
+            : "Mission control — demo data (connect Supabase for live)"
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4">
         <StatPill label="Active agents" value={`${activeAgents}/${agents.length}`} accent="green" />
         <StatPill label="Queue depth" value={String(queueTotal)} accent="cyan" />
         <StatPill label="Spend today" value={formatUsd(usage.dailySpend)} accent="amber" />

@@ -15,7 +15,7 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("glass p-5", className)}>
+    <section className={cn("glass p-4 sm:p-5", className)}>
       {(title || right) && (
         <header className="mb-4 flex items-start justify-between gap-3">
           <div>
@@ -54,11 +54,11 @@ export function StatPill({
     pink: "text-neon-pink shadow-neon-pink",
   };
   return (
-    <div className="glass glass-hover p-4">
-      <div className="text-xs uppercase tracking-wider text-ink-faint">
+    <div className="glass glass-hover p-3 sm:p-4">
+      <div className="text-[10px] uppercase tracking-wider text-ink-faint sm:text-xs">
         {label}
       </div>
-      <div className={cn("mt-1 text-2xl font-semibold neon-text", map[accent])}>
+      <div className={cn("mt-1 text-lg font-semibold neon-text sm:text-2xl", map[accent])}>
         {value}
       </div>
     </div>

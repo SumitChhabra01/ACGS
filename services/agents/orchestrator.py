@@ -2,7 +2,7 @@
 
 No autonomous loops, no recursive agent chat. It dispatches a fixed workflow,
 collects results, and reports cost. Each workflow maps to a GitHub Actions
-schedule (trends=2h, content=6h, analytics=daily) or a manual admin command.
+schedule (trends=6h, content=12h, analytics=daily) or a manual admin command.
 """
 from __future__ import annotations
 
@@ -65,6 +65,7 @@ class Orchestrator:
                 "recommendations": res.output.get("recommendations", [])[:5],
             },
         )
+        store.save_latest_analytics(res.output)
         return res
 
     def run_reel_ideas(

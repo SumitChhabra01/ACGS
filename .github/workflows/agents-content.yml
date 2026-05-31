@@ -1,11 +1,11 @@
-# Trends → content drafts every 6 hours → Supabase content_items (pending_approval).
+# Trends → content drafts every 12 hours → Supabase content_items (pending_approval).
 # Requires ANTHROPIC_API_KEY for real drafts; mock output is NOT saved to the pipeline.
 
-name: Agents — Content (every 6h)
+name: Agents — Content (every 12h)
 
 on:
   schedule:
-    - cron: "30 */6 * * *" # every 6h at :30 UTC
+    - cron: "30 */12 * * *" # every 12h at :30 UTC
   workflow_dispatch:
 
 concurrency:

@@ -1,53 +1,38 @@
-import { AnalyticsLive } from "@/components/live/AnalyticsLive";
+"use client";
+
+import { useEffect, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Panel, StatPill } from "@/components/ui/Panel";
-import { EngagementChart } from "@/components/widgets/EngagementChart";
 import { TopPostsChart } from "@/components/widgets/TopPostsChart";
-import { demoAnalytics } from "@/lib/demo-data";
+import { fetchLatestAnalytics } from "@/lib/live-client";
+import type { GrowthReport } from "@/lib/growth";
 import { formatCompact } from "@/lib/utils";
-import { getAccount, getMedia, isInstagramConfigured } from "@/lib/instagram";
-import { analyze, toPostStat, type GrowthReport } from "@/lib/growth";
-import { isPublicDemo } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export function AnalyticsLive() {
+  const [live, setLive] = useState<GrowthReport | null | undefined>(undefined);
 
-async function getLiveReport(): Promise<GrowthReport | null> {
-  if (!isInstagramConfigured()) return null;
-  try {
-    const [account, media] = await Promise.all([getAccount(), getMedia(25)]);
-    return analyze(media.map(toPostStat), account.followersCount, account.mediaCount);
-  } catch {
-    return null;
-  }
-}
+  useEffect(() => {
+    fetchLatestAnalytics().then(setLive);
+  }, []);
 
-export default async function AnalyticsPage() {
-  if (isPublicDemo) {
-    return <AnalyticsLive />;
-  }
-
-  const live = await getLiveReport();
-
-  if (!live) {
-    const igTotal = demoAnalytics.reduce((s, d) => s + d.instagram, 0);
-    const ytTotal = demoAnalytics.reduce((s, d) => s + d.youtube, 0);
+  if (live === undefined) {
     return (
       <div>
-        <TopBar
-          title="Analytics"
-          subtitle="Demo data — connect Instagram to see live @cineai_diaries metrics"
-        />
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatPill label="IG reach (7d)" value={formatCompact(igTotal)} accent="pink" />
-          <StatPill label="YT views (7d)" value={formatCompact(ytTotal)} accent="red" />
-          <StatPill label="Avg viral score" value="78" accent="cyan" />
-          <StatPill label="Best post time" value="6–8 PM" accent="green" />
-        </div>
-        <div className="mt-6">
-          <Panel title="Engagement by day" subtitle="Reach / views per platform">
-            <EngagementChart data={demoAnalytics} />
-          </Panel>
-        </div>
+        <TopBar title="Analytics" subtitle="Loading @cineai_diaries snapshot…" />
+      </div>
+    );
+  }
+
+  if (!live) {
+    return (
+      <div>
+        <TopBar title="Analytics" subtitle="No snapshot yet" />
+        <Panel title="Waiting for daily analytics cron">
+          <p className="text-sm text-ink-dim">
+            Run the <strong>Agents — Analytics</strong> workflow on GitHub. It saves your Instagram
+            growth report to Supabase; refresh this page to view it (no site redeploy needed).
+          </p>
+        </Panel>
       </div>
     );
   }
@@ -58,7 +43,10 @@ export default async function AnalyticsPage() {
 
   return (
     <div>
-      <TopBar title="Analytics" subtitle="Live @cineai_diaries — feeds the growth engine" />
+      <TopBar
+        title="Analytics"
+        subtitle={`Live @cineai_diaries — ${live.postsAnalyzed} posts (from daily analytics cron)`}
+      />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatPill label="Followers" value={formatCompact(live.followers)} accent="pink" />
@@ -81,8 +69,7 @@ export default async function AnalyticsPage() {
             }))}
           />
         </Panel>
-
-        <Panel title="Growth recommendations" subtitle="Data-driven, admin-gated">
+        <Panel title="Growth recommendations" subtitle="From daily analytics cron">
           <ul className="space-y-3 text-sm text-ink-dim">
             {live.recommendations.map((r, i) => (
               <li key={i} className="rounded-xl border border-white/10 bg-white/5 p-3">

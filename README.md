@@ -60,13 +60,15 @@ pip install -r requirements.txt
 ## Cost discipline (non-negotiable)
 Every AI call routes through the model router + budget guard. Cheapest capable tier first (local → Haiku → Sonnet/Opus), cache before regenerate, retrieve before generate, validate before publish. Target: ~$100–500/month at MVP.
 
-## Public demo (GitHub Pages)
+## Public dashboard (GitHub Pages)
 
-After the **Deploy GitHub Pages** workflow runs on `main`, the dashboard UI is available at:
+After the **Deploy GitHub Pages** workflow runs on `main`:
 
 **https://sumitchhabra01.github.io/ACGS/**
 
-This is a **static preview** with sample data so others can see the UI. It does not run Python agents or live APIs. For full live mode, run locally (`npm run dev`) or deploy to Vercel with your `.env` secrets.
+The site is static, but the UI loads **live data from Supabase** in the browser (no sample/demo data). Cron agents write to the same tables; **refresh the page** after a workflow finishes to see new trends, drafts, and analytics.
+
+Setup: add GitHub secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, run migration `0003_public_read.sql`, then redeploy Pages. See **[docs/GITHUB_CRON.md](./docs/GITHUB_CRON.md)**.
 
 Enable Pages once: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 

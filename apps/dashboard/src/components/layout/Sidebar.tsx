@@ -2,21 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Workflow,
-  LineChart,
-  Settings,
-  Bot,
-} from "lucide-react";
+import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const NAV = [
-  { href: "/", label: "Command Center", icon: LayoutDashboard },
-  { href: "/content", label: "Content Pipeline", icon: Workflow },
-  { href: "/analytics", label: "Analytics", icon: LineChart },
-  { href: "/settings", label: "Settings", icon: Settings },
-] as const;
+import { isNavActive, MAIN_NAV } from "@/lib/nav";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -35,9 +23,9 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+      <nav className="flex flex-1 flex-col gap-1" aria-label="Main navigation">
+        {MAIN_NAV.map(({ href, label, icon: Icon }) => {
+          const active = isNavActive(pathname, href);
           return (
             <Link
               key={href}

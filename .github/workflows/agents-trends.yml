@@ -1,11 +1,11 @@
-# Classify + score trends every 2 hours → Supabase trends table.
+# Classify + score trends every 6 hours → Supabase trends table.
 # Uses Anthropic if ANTHROPIC_API_KEY is set; otherwise classifies with mock (still runs).
 
-name: Agents — Trends (every 2h)
+name: Agents — Trends (every 6h)
 
 on:
   schedule:
-    - cron: "15 */2 * * *" # every 2h at :15 UTC (staggered from content)
+    - cron: "15 */6 * * *" # every 6h at :15 UTC
   workflow_dispatch:
 
 concurrency:

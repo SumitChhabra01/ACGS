@@ -151,6 +151,27 @@ def save_trends(trends: list[dict[str, Any]]) -> int:
         return 0
 
 
+def save_latest_analytics(report: dict[str, Any]) -> None:
+    """Store the latest growth report for the static dashboard (GitHub Pages)."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        from datetime import datetime, timedelta, timezone
+
+        expires = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+        client.table("cache_entries").upsert(
+            {
+                "key": "latest_analytics",
+                "task_type": "analytics",
+                "payload": report,
+                "expires_at": expires,
+            }
+        ).execute()
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def save_audit_log(*, agent: str, action: str, detail: dict[str, Any]) -> None:
     """Append a row to audit_logs (cron summaries, growth snapshots)."""
     client = _get_client()
