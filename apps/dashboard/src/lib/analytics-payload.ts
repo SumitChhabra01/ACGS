@@ -65,9 +65,13 @@ export function normalizeGrowthReport(raw: unknown): GrowthReport | null {
       ? [p.summary]
       : [];
 
-  if (postsAnalyzed === 0 && topPosts.length === 0 && recommendations.length === 0) {
-    return null;
-  }
+  const hasData =
+    postsAnalyzed > 0 ||
+    topPosts.length > 0 ||
+    recommendations.length > 0 ||
+    followers > 0 ||
+    mediaCount > 0;
+  if (!hasData) return null;
 
   const bestHour = p.best_hour_utc ?? p.bestHourUtc;
   const bestHourUtc =

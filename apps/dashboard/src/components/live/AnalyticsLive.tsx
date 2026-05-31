@@ -10,9 +10,19 @@ import { formatCompact } from "@/lib/utils";
 
 export function AnalyticsLive() {
   const [live, setLive] = useState<GrowthReport | null | undefined>(undefined);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLatestAnalytics().then(setLive);
+    fetchLatestAnalytics()
+      .then((report) => {
+        setFetchError(null);
+        setLive(report);
+      })
+      .catch((err: unknown) => {
+        console.error("Analytics fetch failed:", err);
+        setFetchError(err instanceof Error ? err.message : "Could not load analytics");
+        setLive(null);
+      });
   }, []);
 
   if (live === undefined) {
@@ -27,10 +37,21 @@ export function AnalyticsLive() {
     return (
       <div>
         <TopBar title="Analytics" subtitle="No snapshot yet" />
-        <Panel title="Waiting for daily analytics cron">
+        <Panel title={fetchError ? "Could not load analytics" : "Waiting for daily analytics cron"}>
           <p className="text-sm text-ink-dim">
-            Run the <strong>Agents — Analytics</strong> workflow on GitHub. It saves your Instagram
-            growth report to Supabase; refresh this page to view it (no site redeploy needed).
+            {fetchError ? (
+              <>
+                {fetchError}. Check that GitHub secrets include{" "}
+                <code className="text-neon-cyan">SUPABASE_URL</code> and{" "}
+                <code className="text-neon-cyan">SUPABASE_ANON_KEY</code>, and that migration{" "}
+                <code className="text-neon-cyan">0003_public_read.sql</code> was applied.
+              </>
+            ) : (
+              <>
+                Run <strong>Agents — Analytics</strong> under Actions (not the CI “agents” lint
+                job). It saves your report to Supabase; refresh this page after it succeeds.
+              </>
+            )}
           </p>
         </Panel>
       </div>
@@ -54,7 +75,11 @@ export function AnalyticsLive() {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatPill label="Followers" value={formatCompact(live.followers)} accent="pink" />
+        <StatPill
+          label="Followers"
+          value={formatCompact(Number(live.followers) || 0)}
+          accent="pink"
+        />
         <StatPill label="Posts" value={String(live.mediaCount)} accent="violet" />
         <StatPill label="Avg engagement" value={erPct} accent="green" />
         <StatPill label="Best day" value={live.bestWeekday ?? "—"} accent="cyan" />

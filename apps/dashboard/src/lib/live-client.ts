@@ -177,6 +177,15 @@ export async function fetchLatestAnalytics(): Promise<GrowthReport | null> {
     .select("payload")
     .eq("key", "latest_analytics")
     .maybeSingle();
-  if (error || !data?.payload) return null;
-  return normalizeGrowthReport(data.payload);
+  if (error || data?.payload == null) return null;
+
+  let payload: unknown = data.payload;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload);
+    } catch {
+      return null;
+    }
+  }
+  return normalizeGrowthReport(payload);
 }

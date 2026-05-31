@@ -157,9 +157,9 @@ def save_latest_analytics(report: dict[str, Any]) -> None:
     if client is None:
         return
     try:
-        from datetime import datetime, timedelta, timezone
+        from datetime import UTC, datetime, timedelta
 
-        expires = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+        expires = (datetime.now(UTC) + timedelta(days=7)).isoformat()
         client.table("cache_entries").upsert(
             {
                 "key": "latest_analytics",

@@ -15,8 +15,12 @@ export function TopPostsChart({
 }: {
   data: { label: string; engagement: number; reach: number }[];
 }) {
+  if (!data?.length) {
+    return <p className="text-sm text-ink-dim">No chart data.</p>;
+  }
+
   return (
-    <div className="h-72 w-full">
+    <div className="h-72 min-h-[12rem] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
