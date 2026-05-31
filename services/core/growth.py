@@ -21,6 +21,7 @@ class PostStat:
     reach: int
     saves: int
     media_product_type: str
+    permalink: str = ""
 
     @property
     def interactions(self) -> int:
@@ -52,7 +53,11 @@ def _first_line(caption: str) -> str:
     return (caption or "").strip().splitlines()[0][:80] if caption else ""
 
 
-def analyze(posts: list[PostStat], followers: int | None = None) -> dict[str, Any]:
+def analyze(
+    posts: list[PostStat],
+    followers: int | None = None,
+    media_count: int | None = None,
+) -> dict[str, Any]:
     if not posts:
         return {"summary": "No posts to analyze yet.", "recommendations": []}
 
@@ -89,6 +94,7 @@ def analyze(posts: list[PostStat], followers: int | None = None) -> dict[str, An
     return {
         "posts_analyzed": len(posts),
         "followers": followers,
+        "media_count": media_count,
         "avg_engagement_rate": avg_er,
         "best_hour_utc": best_hour,
         "best_weekday": best_weekday,
@@ -97,6 +103,7 @@ def analyze(posts: list[PostStat], followers: int | None = None) -> dict[str, An
             {
                 "id": p.id,
                 "hook": _first_line(p.caption),
+                "permalink": p.permalink,
                 "engagement_rate": p.engagement_rate,
                 "reach": p.reach,
             }

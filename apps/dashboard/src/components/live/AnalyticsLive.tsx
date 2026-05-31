@@ -37,9 +37,14 @@ export function AnalyticsLive() {
     );
   }
 
-  const erPct = `${(live.avgEngagementRate * 100).toFixed(1)}%`;
+  const avgEr = Number(live.avgEngagementRate) || 0;
+  const erPct = `${(avgEr * 100).toFixed(1)}%`;
   const bestTime =
-    live.bestHourUtc === null ? "—" : `${String(live.bestHourUtc).padStart(2, "0")}:00 UTC`;
+    live.bestHourUtc === null || live.bestHourUtc === undefined
+      ? "—"
+      : `${String(live.bestHourUtc).padStart(2, "0")}:00 UTC`;
+  const topPosts = Array.isArray(live.topPosts) ? live.topPosts : [];
+  const recommendations = Array.isArray(live.recommendations) ? live.recommendations : [];
 
   return (
     <div>
@@ -61,17 +66,21 @@ export function AnalyticsLive() {
           subtitle={`Best format: ${live.bestFormat ?? "—"} · Best time: ${bestTime}`}
           className="xl:col-span-2"
         >
-          <TopPostsChart
-            data={live.topPosts.map((p) => ({
-              label: p.hook.slice(0, 24) || p.id.slice(-6),
-              engagement: Math.round(p.engagementRate * 1000) / 10,
-              reach: p.reach,
-            }))}
-          />
+          {topPosts.length > 0 ? (
+            <TopPostsChart
+              data={topPosts.map((p) => ({
+                label: (p.hook || "").slice(0, 24) || String(p.id).slice(-6),
+                engagement: Math.round((Number(p.engagementRate) || 0) * 1000) / 10,
+                reach: Number(p.reach) || 0,
+              }))}
+            />
+          ) : (
+            <p className="text-sm text-ink-dim">No top posts in this snapshot yet.</p>
+          )}
         </Panel>
         <Panel title="Growth recommendations" subtitle="From daily analytics cron">
           <ul className="space-y-3 text-sm text-ink-dim">
-            {live.recommendations.map((r, i) => (
+            {recommendations.map((r, i) => (
               <li key={i} className="rounded-xl border border-white/10 bg-white/5 p-3">
                 {r}
               </li>
@@ -83,19 +92,27 @@ export function AnalyticsLive() {
       <div className="mt-6">
         <Panel title="Top posts" subtitle="Tap to open on Instagram">
           <ul className="divide-y divide-white/5">
-            {live.topPosts.map((p) => (
+            {topPosts.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
-                <a
-                  href={p.permalink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="min-w-0 flex-1 truncate text-sm text-ink hover:text-neon-cyan"
-                >
-                  {p.hook || p.id}
-                </a>
+                {p.permalink ? (
+                  <a
+                    href={p.permalink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="min-w-0 flex-1 truncate text-sm text-ink hover:text-neon-cyan"
+                  >
+                    {p.hook || p.id}
+                  </a>
+                ) : (
+                  <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                    {p.hook || p.id}
+                  </span>
+                )}
                 <span className="shrink-0 text-xs text-ink-dim">
-                  <span className="text-neon-green">{(p.engagementRate * 100).toFixed(1)}%</span>{" "}
-                  · {formatCompact(p.reach)} reach
+                  <span className="text-neon-green">
+                    {((Number(p.engagementRate) || 0) * 100).toFixed(1)}%
+                  </span>{" "}
+                  · {formatCompact(Number(p.reach) || 0)} reach
                 </span>
               </li>
             ))}

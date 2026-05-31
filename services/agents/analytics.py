@@ -90,10 +90,15 @@ class AnalyticsAgent(Agent):
                 reach=m.insights.get("reach", 0),
                 saves=m.insights.get("saved", 0),
                 media_product_type=m.media_product_type,
+                permalink=m.permalink,
             )
             for m in media
         ]
-        result = analyze(posts, followers=int(account.get("followers_count", 0)))
+        result = analyze(
+            posts,
+            followers=int(account.get("followers_count", 0)),
+            media_count=int(account.get("media_count", 0)),
+        )
         result["source"] = "instagram"
         result["account"] = {
             "username": account.get("username"),

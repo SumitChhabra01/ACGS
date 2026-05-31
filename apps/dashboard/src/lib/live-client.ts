@@ -8,6 +8,7 @@ import type {
   Trend,
 } from "@aicos/shared-types";
 import { createClient } from "@/lib/supabase/client";
+import { normalizeGrowthReport } from "@/lib/analytics-payload";
 import type { GrowthReport } from "@/lib/growth";
 import { mapContent, mapTrend, round } from "@/lib/mappers";
 import type { BurnPoint, UsageSummary } from "@/lib/queries";
@@ -177,5 +178,5 @@ export async function fetchLatestAnalytics(): Promise<GrowthReport | null> {
     .eq("key", "latest_analytics")
     .maybeSingle();
   if (error || !data?.payload) return null;
-  return data.payload as GrowthReport;
+  return normalizeGrowthReport(data.payload);
 }
